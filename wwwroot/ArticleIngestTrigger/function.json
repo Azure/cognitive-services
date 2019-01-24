@@ -1,0 +1,21 @@
+{
+  "bindings": [
+    {
+      "type": "cosmosDBTrigger",
+      "name": "input",
+      "direction": "in",
+      "leaseCollectionName": "leases",
+      "connectionStringSetting": "ArticleIngestTrigger_ConnectionString",
+      "databaseName": "Articles",
+      "collectionName": "Ingest",
+      "createLeaseCollectionIfNotExists": true
+    },
+    {
+      "name": "outputSbQueue",
+      "type": "serviceBus",
+      "queueName": "translationqueue",
+      "connection": "ServiceBus_ConnectionString",
+      "direction": "out"
+    }
+  ]
+}

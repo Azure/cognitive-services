@@ -1,0 +1,19 @@
+{
+  "bindings": [
+    {
+      "name": "myQueueItem",
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "queueName": "faceapiqueue",
+      "connection": "ServiceBus_ConnectionString"
+    },
+    {
+      "name": "outputSbQueue",
+      "type": "serviceBus",
+      "queueName": "inspectionqueue",
+      "connection": "ServiceBus_ConnectionString",
+      "direction": "out"
+    }
+  ],
+  "disabled": false
+}

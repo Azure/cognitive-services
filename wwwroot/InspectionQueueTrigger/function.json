@@ -1,0 +1,12 @@
+{
+  "bindings": [
+    {
+      "name": "myQueueItem",
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "queueName": "inspectionqueue",
+      "connection": "ServiceBus_ConnectionString"
+    }
+  ],
+  "disabled": false
+}

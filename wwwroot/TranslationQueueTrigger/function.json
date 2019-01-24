@@ -1,0 +1,18 @@
+{
+  "bindings": [
+    {
+      "name": "myQueueItem",
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "queueName": "translationqueue",
+      "connection": "ServiceBus_ConnectionString"
+    },
+    {
+      "name": "outputSbQueue",
+      "type": "serviceBus",
+      "queueName": "ocrqueue",
+      "connection": "ServiceBus_ConnectionString",
+      "direction": "out"
+    }
+  ]
+}

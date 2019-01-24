@@ -1,0 +1,69 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "accountName": {
+      "defaultValue": "text",
+      "metadata": {
+        "description": "Display name of Text API account"
+      },
+      "type": "string"
+    },
+    "SKU": {
+      "type": "string",
+      "metadata": {
+        "description": "SKU for Text API"
+      },
+      "defaultValue": "S0",
+      "allowedValues": [
+        "S0",
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    },
+    "cognitiveServicesLocation": {
+      "metadata": {
+        "description": "The location for the Text API"
+      },
+      "type": "string",
+      "minLength": 1,
+      "allowedValues": [
+        "westeurope",
+        "eastus",
+        "eastus2",
+        "southeastasia",
+        "centralus",
+        "westus"
+      ],
+      "defaultValue": "eastus"
+    }
+  },
+  "variables": {
+    "cognitiveservicesid": "[concat(resourceGroup().id,'/providers/','Microsoft.CognitiveServices/accounts/', parameters('accountName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "sku": {
+        "name": "[parameters('SKU')]"
+      },
+      "kind": "TextAnalytics",
+      "name": "[parameters('accountName')]",
+      "apiVersion": "2016-02-01-preview",
+      "location": "[parameters('cognitiveServicesLocation')]",
+      "properties": {}
+    }
+  ],
+  "outputs": {
+    "cognitivekey": {
+      "type": "string",
+      "value": "[listKeys(variables('cognitiveservicesid'),'2016-02-01-preview').key1]"
+    },
+    "endpoint": {
+      "type": "string",
+      "value": "[reference(variables('cognitiveservicesid'),'2016-02-01-preview').endpoint]"
+    }
+  }
+}

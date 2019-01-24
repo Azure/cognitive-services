@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "accountName": {
+      "defaultValue": "translate",
+      "metadata": {
+        "description": "Display name of Text Translation API account"
+      },
+      "type": "string"
+    },
+    "SKU": {
+      "type": "string",
+      "metadata": {
+        "description": "SKU for TextTranslation API"
+      },
+      "defaultValue": "F0",
+      "allowedValues": [
+        "F0",
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ]
+    }
+  },
+  "variables": {
+    "cognitiveservicesid": "[concat(resourceGroup().id,'/providers/','Microsoft.CognitiveServices/accounts/', parameters('accountName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "sku": {
+        "name": "[parameters('SKU')]"
+      },
+      "kind": "TextTranslation",
+      "name": "[parameters('accountName')]",
+      "apiVersion": "2016-02-01-preview",
+      "location": "global",
+      "properties": {}
+    }
+  ],
+  "outputs": {
+    "cognitivekey": {
+      "type": "string",
+      "value": "[listKeys(variables('cognitiveservicesid'),'2016-02-01-preview').key1]"
+    },
+    "endpoint": {
+      "type": "string",
+      "value": "[reference(variables('cognitiveservicesid'),'2016-02-01-preview').endpoint]"
+    }
+  }
+}

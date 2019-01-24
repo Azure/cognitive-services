@@ -1,0 +1,309 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"appName": {
+			"type": "string",
+			"metadata": {
+				"description": "The name of the function app that you wish to create."
+			}
+		},
+		"storageAccountType": {
+			"type": "string",
+			"defaultValue": "Standard_LRS",
+			"allowedValues": [
+				"Standard_LRS",
+				"Standard_GRS",
+				"Standard_RAGRS"
+			],
+			"metadata": {
+				"description": "Storage Account type"
+			}
+		},
+		"location": {
+			"type": "string",
+			"defaultValue": "[resourceGroup().location]",
+			"metadata": {
+				"description": "Location for all resources."
+			}
+		},
+		"cosmosConnectionString": {
+			"type": "string",
+			"defaultValue": "INVALID",
+			"metadata": {
+				"description": "Connection string to cosmosDB."
+			}
+		},
+		"cosmosDatabase": {
+			"type": "string",
+			"defaultValue": "Articles",
+			"metadata": {
+				"description": "Connection string to cosmosDB."
+			}
+		},
+		"cosmosInspectionCollection": {
+			"type": "string",
+			"defaultValue": "Inspection",
+			"metadata": {
+				"description": "Connection string to cosmosDB."
+			}
+		},
+		"cosmosProcessedCollection": {
+			"type": "string",
+			"defaultValue": "Processed",
+			"metadata": {
+				"description": "Connection string to cosmosDB."
+			}
+		},
+		"cosmosIngestCollection": {
+			"type": "string",
+			"defaultValue": "Ingest",
+			"metadata": {
+				"description": "Ingest collection in cosmos"
+			}
+		},
+		"sbConnectionString": {
+			"type": "string",
+			"defaultValue": "INVALID",
+			"metadata": {
+				"description": "Service Bus Connection String."
+			}
+		},
+		"faceURI": {
+			"type": "string",
+			"defaultValue": "INVALID",
+			"metadata": {
+				"description": "Face API URI."
+			}
+		},
+		"faceKey": {
+			"type": "string",
+			"defaultValue": "INVALID",
+			"metadata": {
+				"description": "Face API Key."
+			}
+		},
+		"textURI": {
+			"type": "string",
+			"defaultValue": "INVALID",
+			"metadata": {
+				"description": "Text API URI."
+			}
+		},
+		"textKey": {
+			"type": "string",
+			"defaultValue": "INVALID",
+			"metadata": {
+				"description": "Text API Key."
+			}
+		},
+		"translationKey": {
+			"type": "string",
+			"defaultValue": "INVALID",
+			"metadata": {
+				"description": "Translation API Key."
+			}
+		},
+		"translationURI": {
+			"type": "string",
+			"defaultValue": "INVALID",
+			"metadata": {
+				"description": "Translation API Uri."
+			}
+		},
+		"translationLang": {
+			"type": "string",
+			"defaultValue": "en",
+			"metadata": {
+				"description": "Translation Language"
+			}
+		},
+		"visionKey": {
+			"type": "string",
+			"defaultValue": "INVALID",
+			"metadata": {
+				"description": "Vision API Key."
+			}
+		},
+		"visionURI": {
+			"type": "string",
+			"defaultValue": "INVALID",
+			"metadata": {
+				"description": "Vision API Uri."
+			}
+		},
+		"packageUri" : {
+			"type": "string",
+			"defaultValue": "INVALID",
+			"metadata": {
+				"description": "Blob URI of function package"
+			}
+		}
+	},
+	"variables": {
+		"usableAppName": "[substring(concat(parameters('appName'), uniqueString(resourceGroup().id)),0,15)]",
+		"functionAppName": "[variables('usableAppName')]",
+		"hostingPlanName": "[variables('usableAppName')]",
+		"applicationInsightsName": "[variables('usableAppName')]",
+		"storageAccountName": "[concat(variables('usableAppName'), 'stg')]",
+		"storageAccountid": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
+	},
+	"resources": [{
+			"type": "Microsoft.Storage/storageAccounts",
+			"name": "[variables('storageAccountName')]",
+			"apiVersion": "2016-12-01",
+			"location": "[parameters('location')]",
+			"kind": "Storage",
+			"sku": {
+				"name": "[parameters('storageAccountType')]"
+			}
+		},
+		{
+			"type": "Microsoft.Web/serverfarms",
+			"apiVersion": "2015-04-01",
+			"name": "[variables('hostingPlanName')]",
+			"location": "[parameters('location')]",
+			"properties": {
+				"name": "[variables('hostingPlanName')]",
+				"computeMode": "Dynamic",
+				"sku": "Dynamic"
+			}
+		},
+		{
+			"apiVersion": "2015-08-01",
+			"type": "Microsoft.Web/sites",
+			"name": "[variables('functionAppName')]",
+			"location": "[parameters('location')]",
+			"kind": "functionapp",
+			"dependsOn": [
+				"[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+				"[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+			],
+			"properties": {
+				"serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+				"siteConfig": {
+					"appSettings": [{
+							"name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+							"value": "[reference(resourceId('microsoft.insights/components/', variables('applicationInsightsName')), '2015-05-01').InstrumentationKey]"
+						},
+						{
+							"name": "AzureWebJobsStorage",
+							"value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]"
+						},
+						{
+							"name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+							"value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]"
+						},
+						{
+							"name": "WEBSITE_RUN_FROM_PACKAGE",
+							"value": "[parameters('packageUri')]"
+						},
+						{
+							"name": "WEBSITE_CONTENTSHARE",
+							"value": "[toLower(variables('functionAppName'))]"
+						},
+						{
+							"name": "FUNCTIONS_EXTENSION_VERSION",
+							"value": "~2"
+						},
+						{
+							"name": "FUNCTIONS_WORKER_RUNTIME",
+							"value": "dotnet"
+						},
+						{
+							"name": "WEBSITE_NODE_DEFAULT_VERSION",
+							"value": "8.11.1"
+						},
+						{
+							"name": "ArticleIngestTrigger_ConnectionString",
+							"value": "[parameters('cosmosConnectionString')]"
+						},
+						{
+							"name": "CosmosDbName",
+							"value": "[parameters('cosmosDatabase')]"
+						},
+						{
+							"name": "CosmosCollectionName",
+							"value": "[parameters('cosmosIngestCollection')]"
+						},
+						{
+							"name": "CosmosInspectionCollectionName",
+							"value": "[parameters('cosmosInspectionCollection')]"
+						},
+						{
+							"name": "CosmosProcessedCollectionName",
+							"value": "[parameters('cosmosProcessedCollection')]"
+						},
+						{
+							"name": "ServiceBus_ConnectionString",
+							"value": "[parameters('sbConnectionString')]"
+						},
+						{
+							"name": "FaceAPIKey",
+							"value": "[parameters('faceKey')]"
+						},
+						{
+							"name": "FaceAPIUri",
+							"value": "[parameters('faceURI')]"
+						},
+						{
+							"name": "TextAPIKey",
+							"value": "[parameters('textKey')]"
+						},
+						{
+							"name": "TextAPIUri",
+							"value": "[parameters('textURI')]"
+						},
+						{
+							"name": "TranslationAPIKey",
+							"value": "[parameters('translationKey')]"
+						},
+						{
+							"name": "TranslationAPIUri",
+							"value": "[parameters('translationURI')]"
+						},
+						{
+							"name": "TranslationAPITargetLanguage",
+							"value": "[parameters('translationLang')]"
+						},
+						{
+							"name": "VisionAPIKey",
+							"value": "[parameters('visionKey')]"
+						},
+						{
+							"name": "VisionAPIUri",
+							"value": "[parameters('visionURI')]"
+						}
+					]
+				}
+			}
+		},
+		{
+			"apiVersion": "2018-05-01-preview",
+			"name": "[variables('applicationInsightsName')]",
+			"type": "microsoft.insights/components",
+			"location": "East US",
+			"tags": {
+				"[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('applicationInsightsName'))]": "Resource"
+			},
+			"properties": {
+				"ApplicationId": "[variables('applicationInsightsName')]",
+				"Request_Source": "IbizaWebAppExtensionCreate"
+			}
+		}
+	],
+	"outputs": {
+		"storageKey": {
+			"type": "string",
+			"value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]"
+		},
+		"storageName": {
+			"type": "string",
+			"value": "[variables('storageAccountName')]"
+		},
+		"functionAppName": {
+			"type": "string",
+			"value": "[variables('functionAppName')]"
+		}
+	}
+}
