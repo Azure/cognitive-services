@@ -1,6 +1,5 @@
 # Demos - Cognitive Services
 <sup>Use Case: Mass Ingestion of Electronic Documents</sup> <br>
-<sup>Created by Dan Grecoe, a Microsoft employee</sup>
 
 There are quite a few Azure services that can be used right out of the box to provide Machine Learning and Artificial Intelligence in the [Azure Cognitive Services](https://azure.microsoft.com/en-us/services/cognitive-services/) suite. There are text, computer vision, facial recognition, video indexing, etc. services that offer some powerful functionality without you, the user, ever having to write a line of code or understand the machine learning concepts that underpin them. 
 

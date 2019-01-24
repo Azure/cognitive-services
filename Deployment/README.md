@@ -1,6 +1,5 @@
 # Deployment
 <sup>Use Case: Mass Ingestion of Electronic Documents</sup> <br>
-<sup>Created by Dan Grecoe, a Microsoft employee</sup>
 
 This directory contains all of the scripts and code required to deploy and test this pipeline. 
 
