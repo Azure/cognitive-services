@@ -1,7 +1,5 @@
 # wwwroot
-<sup>Use Case: Mass Ingestion of Electronic Documents</sup> <br>
-<sup>Created by Dan Grecoe, a Microsoft employee</sup>
- 
+<sup>Use Case: Mass Ingestion of Electronic Documents</sup> <br> 
  
  This directory contains the code for the Azure Functions that are required in the pipeline. 
  
